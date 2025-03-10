@@ -1,17 +1,25 @@
 // src/pages/_app.tsx
 import { useEffect } from "react";
+import type { AppProps } from "next/app";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-function MyApp({ Component, pageProps }: any) {
+const queryClient = new QueryClient();
+
+function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      // 클라이언트 사이드에서만 MSW를 초기화
-      import("../mocks/initMocks").then(({ initMocks }) => {
-        initMocks();
+    if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+      import("../mocks/browser").then(({ worker }) => {
+        worker.start({ onUnhandledRequest: "bypass" });
+        console.log("✅ MSW worker started");
       });
     }
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Component {...pageProps} />
+    </QueryClientProvider>
+  );
 }
 
 export default MyApp;
