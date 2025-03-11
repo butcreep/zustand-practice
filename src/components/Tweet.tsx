@@ -1,4 +1,4 @@
-import { useTweetStore } from "../store/useTweetStore";
+import { useTweetStore } from "../store/useThemeStore";
 
 const Tweet = ({ id, content, likes }: { id: number; content: string; likes: number }) => {
   const likeTweet = useTweetStore(state => state.likeTweet);

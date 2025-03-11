@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useThemeStore } from "@/store/useThemeStore";
 
 export default function Navbar() {
+  const { darkMode, toggleDarkMode } = useThemeStore();
   return (
     <nav className="flex items-center justify-between p-4 border-b">
-      <div className="text-xl font-bold">트위터 클론</div>
+      <div className="text-xl font-bold">Zuweeter</div>
       <div>
         <Link href="/profile" className="flex items-center space-x-2">
           <Image
@@ -16,6 +18,7 @@ export default function Navbar() {
           />
           <span>프로필</span>
         </Link>
+        <button onClick={toggleDarkMode}>{darkMode ? "🌙" : "☀️"}</button>
       </div>
     </nav>
   );
