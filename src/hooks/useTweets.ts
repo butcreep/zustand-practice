@@ -55,14 +55,33 @@ export function useTweets() {
 
   // 좋아요 업데이트
   const likeTweetMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await fetch(`/api/tweets/${id}/like`, {
+    mutationFn: async (tweetId: number) => {
+      const res = await fetch(`/api/tweets/${tweetId}/like`, {
         method: "PATCH",
       });
       if (!res.ok) throw new Error("Error liking tweet");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tweets"] }),
+    onMutate: async (tweetId: number) => {
+      await queryClient.cancelQueries({ queryKey: ["tweets"] });
+      const previousTweets = queryClient.getQueryData<any[]>(["tweets"]);
+      // Optimistically update: 해당 트윗의 좋아요 수를 1 증가
+      if (previousTweets) {
+        queryClient.setQueryData<any[]>(["tweets"], prev =>
+          prev?.map(tweet => (tweet.id === tweetId ? { ...tweet, likes: tweet.likes + 1 } : tweet)),
+        );
+      }
+      return { previousTweets };
+    },
+    onError: (err, tweetId, context: any) => {
+      // 에러 발생 시 이전 상태로 롤백
+      if (context?.previousTweets) {
+        queryClient.setQueryData(["tweets"], context.previousTweets);
+      }
+    },
+    onSettled: tweetId => {
+      queryClient.invalidateQueries({ queryKey: ["tweets"] });
+    },
   });
 
   return {

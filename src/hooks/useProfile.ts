@@ -9,13 +9,13 @@ export const fetchProfile = async () => {
 
 export function useProfile() {
   const queryClient = useQueryClient();
-  const { data, error, isLoading } = useQuery(["profile"], fetchProfile, {
-    // 초기 프로필 데이터를 설정할 수도 있음
-    initialData: { nickname: "사용자", profileImage: "/default-profile.png" },
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
+    // initialData: { nickname: "Guest", profileImage: "/default-profile.png" },
   });
-
-  const updateProfileMutation = useMutation(
-    async (updates: { nickname?: string; profileImage?: string }) => {
+  const updateProfileMutation = useMutation({
+    mutationFn: async (updates: { nickname?: string; profileImage?: string }) => {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -24,10 +24,8 @@ export function useProfile() {
       if (!res.ok) throw new Error("Error updating profile");
       return res.json();
     },
-    {
-      onSuccess: () => queryClient.invalidateQueries(["profile"]),
-    },
-  );
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
+  });
 
   return { profile: data, error, isLoading, updateProfileMutation };
 }

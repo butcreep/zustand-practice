@@ -5,11 +5,15 @@ let tweets = [
   { id: 1, content: "첫 번째 트윗!", likes: 5 },
   { id: 2, content: "두 번째 트윗!", likes: 2 },
 ];
-
+let profile = { nickname: "Guest", profileImage: "/default-profile.png" };
 export const handlers = [
   // ✅ GET /api/tweets: 모든 트윗 가져오기
   http.get("/api/tweets", () => {
     return HttpResponse.json(tweets); // 메모리에서 저장된 데이터 반환
+  }),
+  // ✅ GET /api/profile: 프로필 가져오기
+  http.get("/api/profile", () => {
+    return HttpResponse.json(profile); // 메모리에서 저장된 데이터 반환
   }),
 
   // ✅ POST /api/tweets: 새로운 트윗 추가
@@ -50,9 +54,10 @@ export const handlers = [
     return HttpResponse.json(updatedTweet, { status: 200 });
   }),
 
-  // // ✅ PATCH /api/profile: 프로필 업데이트 (예시)
-  // http.patch("/api/profile", async ({ request }) => {
-  //   const updates = await request.json();
-  //   return HttpResponse.json({ ...updates }, { status: 200 });
-  // }),
+  // ✅ PATCH /api/profile: 프로필 업데이트 (예시)
+  http.patch("/api/profile", async ({ request }) => {
+    const updates = await request.json();
+    profile = { ...profile, ...updates };
+    return HttpResponse.json(profile, { status: 200 });
+  }),
 ];

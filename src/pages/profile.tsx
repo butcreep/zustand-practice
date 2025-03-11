@@ -1,20 +1,18 @@
 // src/pages/profile.tsx
 import { useState } from "react";
 import { useProfile } from "../hooks/useProfile";
+import Image from "next/image";
 
 export default function Profile() {
   const { profile, isLoading, updateProfileMutation } = useProfile();
   const [nickname, setNickname] = useState(profile?.nickname || "");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
+  // 프로필 사진은 실제 파일 업로드 대신 파일명 정도로 대체
+  const [profileImage, setProfileImage] = useState<string>(profile?.profileImage || "");
 
   if (isLoading) return <div>Loading...</div>;
 
   const handleProfileUpdate = () => {
-    // 프로필 이미지 업로드는 별도 API를 고려할 수 있지만, 여기서는 간단히 파일 객체를 문자열로 대체
-    updateProfileMutation.mutate({
-      nickname,
-      profileImage: profileImage ? profileImage.name : profile.profileImage,
-    });
+    updateProfileMutation.mutate({ nickname, profileImage });
   };
 
   return (
@@ -26,11 +24,7 @@ export default function Profile() {
       </div>
       <div className="mb-4">
         <label className="block">프로필 사진:</label>
-        <input
-          type="file"
-          onChange={e => setProfileImage(e.target.files ? e.target.files[0] : null)}
-          className="border p-2 w-full"
-        />
+        <input type="file" onChange={e => setProfileImage(e.target.value)} className="border p-2 w-full" />
       </div>
       <button onClick={handleProfileUpdate} className="bg-blue-500 text-white p-2">
         업데이트
@@ -38,7 +32,7 @@ export default function Profile() {
       <div className="mt-4">
         <h2 className="font-bold">현재 프로필</h2>
         <p>닉네임: {profile.nickname}</p>
-        <img src={profile.profileImage} alt="Profile" className="w-20 h-20 rounded-full" />
+        <Image src={profile.profileImage} alt="Profile" className="rounded-full" width={32} height={32} />
       </div>
     </div>
   );
